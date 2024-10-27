@@ -1,0 +1,20 @@
+[
+  {
+    "text": "What is the capital of the Great Britain?",
+    "type": "single",
+    "options": ["Paris", "London", "Amsterdam", "New York"],
+    "answers": [1]
+  },
+  {
+    "text": "Which are colors in the RGB color model?",
+    "type": "multiple choice",
+    "options": ["Red", "Green", "Blue", "Yellow"],
+    "answers": [0, 1, 2]
+  },
+  {
+    "text": "Which planets are gas giants?",
+    "type": "multiple choice",
+    "options": ["Earth", "Jupiter", "Mars", "Saturn"],
+    "answers": [1, 3]
+  }
+]
