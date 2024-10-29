@@ -1,7 +1,9 @@
 package com.example.quizzingapplication;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -10,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -140,18 +143,21 @@ public class QuizActivity extends AppCompatActivity {
 
 
     private void displayQuestion(Question question) {
+
+        resetVisibility();
+        resetButtonColors();
+        resetCheckboxColors();
+
         // Set the question text
         questionView.setText(question.getText());
         List<String> options = question.getOptions();
         List<Integer> answers = question.getCorrectAnswers();
-         String questionType = question.getType();
-
-        resetVisibility();
+        String questionType = question.getType();
 
         if (Objects.equals(questionType, "multiple choice")) {
             // Multiple-answer question: checkboxes
             setCheckboxes(options);
-            questionTypeView.setText("Multiple - " + answers.size() + " answers");
+            questionTypeView.setText("Multiple - " + answers.size() + " correct answers");
             submitBtn.setVisibility(View.VISIBLE);
         } else if (Objects.equals(questionType, "single")) {
             // Single-answer question: buttons
@@ -162,7 +168,6 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void resetVisibility() {
-        // Hide all buttons and checkboxes initially
         firstOption.setVisibility(View.GONE);
         secondOption.setVisibility(View.GONE);
         thirdOption.setVisibility(View.GONE);
@@ -225,8 +230,6 @@ public class QuizActivity extends AppCompatActivity {
             });
         }
     }
-
-
     private void setCheckboxes(List<String> options) {
         if (options.size() > 0) {
             firstCheckbox.setText(options.get(0));
@@ -255,11 +258,15 @@ public class QuizActivity extends AppCompatActivity {
 
     private void resetButtons() {
         selectedOptionIndex = -1;
-        // Optionally, reset button backgrounds to default if you change them on selection
     }
 
     private void loadNextQuestion() {
         currentQuestionIndex++;
+
+        resetVisibility();
+        resetButtonColors();
+        resetCheckboxColors();
+
         if (currentQuestionIndex < questionList.size()) {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
@@ -273,28 +280,110 @@ public class QuizActivity extends AppCompatActivity {
             displayQuestion(currentQuestion);
         } else {
             Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
-            // Optionally, navigate to a results screen or restart the quiz
         }
     }
 
-    private void showCorrectAnswers(){
+    private void highlightButton(int index, int color) {
+        switch (index){
+            case 0:
+                firstOption.setBackgroundColor(color);
+                break;
+            case 1:
+                secondOption.setBackgroundColor(color);
+                break;
+            case 2:
+                thirdOption.setBackgroundColor(color);
+                break;
+            case 3:
+                fourthOption.setBackgroundColor(color);
+                break;
+        }
 
+    }
+
+    private void highlightCheckbox(int index, int color) {
+        switch (index) {
+            case 0:
+                firstCheckbox.setBackgroundColor(color);
+                break;
+            case 1:
+                secondCheckbox.setBackgroundColor(color);
+                break;
+            case 2:
+                thirdCheckbox.setBackgroundColor(color);
+                break;
+            case 3:
+                fourthCheckbox.setBackgroundColor(color);
+                break;
+        }
+    }
+
+    private void disableButtons() {
+        firstOption.setEnabled(false);
+        secondOption.setEnabled(false);
+        thirdOption.setEnabled(false);
+        fourthOption.setEnabled(false);
+    }
+
+    private void disableCheckboxes() {
+        firstCheckbox.setEnabled(false);
+        secondCheckbox.setEnabled(false);
+        thirdCheckbox.setEnabled(false);
+        fourthCheckbox.setEnabled(false);
+    }
+
+    private void resetButtonColors() {
+        firstOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
+        secondOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
+        thirdOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
+        fourthOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
+
+        firstOption.setEnabled(true);
+        secondOption.setEnabled(true);
+        thirdOption.setEnabled(true);
+        fourthOption.setEnabled(true);
+    }
+
+    private void resetCheckboxColors() {
+        firstCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        secondCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        thirdCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        fourthCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
+        firstCheckbox.setEnabled(true);
+        secondCheckbox.setEnabled(true);
+        thirdCheckbox.setEnabled(true);
+        fourthCheckbox.setEnabled(true);
+
+        resetCheckboxes();
     }
 
     private void checkAnswer(Question question) {
         List<Integer> selectedAnswers = new ArrayList<>();
         List<Integer> correctAnswers = question.getCorrectAnswers();
+        int correctAnswerIndex = correctAnswers.get(0);
 
-        if (Objects.equals(question.getType(), "multiple choice")){
+        if (Objects.equals(question.getType(), "multiple choice")) {
+
             if (firstCheckbox.isChecked()) selectedAnswers.add(0);
             if (secondCheckbox.isChecked()) selectedAnswers.add(1);
             if (thirdCheckbox.isChecked()) selectedAnswers.add(2);
             if (fourthCheckbox.isChecked()) selectedAnswers.add(3);
 
+            for (int index : correctAnswers) {
+                highlightCheckbox(index, Color.GREEN);
+            }
+
+            for (int index : selectedAnswers) {
+                if (!correctAnswers.contains(index)) {
+                    highlightCheckbox(index, Color.RED);
+                }
+            }
+
             Collections.sort(selectedAnswers);
             Collections.sort(correctAnswers);
 
-            if (selectedAnswers.equals(correctAnswers)){
+            if (selectedAnswers.equals(correctAnswers)) {
                 score += selectedAnswers.size();
                 scoreView.setText(String.valueOf(score));
                 Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
@@ -303,23 +392,26 @@ public class QuizActivity extends AppCompatActivity {
                 incorrectQuestions.add(question);
             }
 
-            resetCheckboxes();
+            disableCheckboxes();
 
         } else if (Objects.equals(question.getType(), "single")) {
+            highlightButton(correctAnswerIndex, Color.GREEN);
 
             if (selectedOptionIndex == correctAnswers.get(0)) {
                 Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += 1;
                 scoreView.setText(String.valueOf(score));
             } else {
+                highlightButton(selectedOptionIndex, Color.RED);
                 Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
                 incorrectQuestions.add(currentQuestion);
             }
 
             selectedOptionIndex = -1;
+            disableButtons();
         }
 
-        loadNextQuestion();
+        new Handler().postDelayed(this::loadNextQuestion, 2000);
     }
 
 }
