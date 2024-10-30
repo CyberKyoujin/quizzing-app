@@ -1,6 +1,7 @@
 package com.example.quizzingapplication;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -288,21 +289,22 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void highlightButton(int index, int color) {
-        switch (index){
+        ColorStateList highlightColor = ColorStateList.valueOf(color);
+
+        switch (index) {
             case 0:
-                firstOption.setBackgroundColor(color);
+                firstOption.setBackgroundTintList(highlightColor);
                 break;
             case 1:
-                secondOption.setBackgroundColor(color);
+                secondOption.setBackgroundTintList(highlightColor);
                 break;
             case 2:
-                thirdOption.setBackgroundColor(color);
+                thirdOption.setBackgroundTintList(highlightColor);
                 break;
             case 3:
-                fourthOption.setBackgroundColor(color);
+                fourthOption.setBackgroundTintList(highlightColor);
                 break;
         }
-
     }
 
     private void highlightCheckbox(int index, int color) {
@@ -344,10 +346,12 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void resetButtonColors() {
-        firstOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
-        secondOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
-        thirdOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
-        fourthOption.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.default_purple));
+        ColorStateList defaultColor = ContextCompat.getColorStateList(this, R.color.default_purple);
+
+        firstOption.setBackgroundTintList(defaultColor);
+        secondOption.setBackgroundTintList(defaultColor);
+        thirdOption.setBackgroundTintList(defaultColor);
+        fourthOption.setBackgroundTintList(defaultColor);
 
         firstOption.setEnabled(true);
         secondOption.setEnabled(true);

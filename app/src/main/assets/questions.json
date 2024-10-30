@@ -1,15 +1,15 @@
 [
   {
     "text": "What is the capital of the Great Britain?",
-    "type": "multiple choice",
+    "type": "single",
     "options": ["Paris", "London", "Amsterdam", "New York"],
-    "answers": [0, 1]
+    "answers": [1]
   },
   {
-    "text": "What are cities in Spain?",
-    "type": "multiple choice",
+    "text": "What is the capital of Italy?",
+    "type": "single",
     "options": ["Madrid", "Rome", "Paris", "Berlin"],
-    "answers": [0, 1]
+    "answers": [1]
   },
   {
     "text": "Which planets are gas giants?",
