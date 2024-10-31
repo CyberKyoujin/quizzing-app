@@ -91,7 +91,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="108dp"
-        android:backgroundTint="#673AB7"
         android:text="CheckBox"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

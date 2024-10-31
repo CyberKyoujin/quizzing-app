@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,7 +109,7 @@ public class QuizActivity extends AppCompatActivity {
             is.read(buffer);
             is.close();
 
-            String json = new String(buffer, "UTF-8");
+            String json = new String(buffer, StandardCharsets.UTF_8);
             JSONArray jsonArray = new JSONArray(json);
 
             for (int i = 0; i < jsonArray.length(); i++){
@@ -142,6 +144,7 @@ public class QuizActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("SetTextI18n")
     private void displayQuestion(Question question) {
 
         resetVisibility();
