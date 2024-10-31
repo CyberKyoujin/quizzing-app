@@ -2,6 +2,7 @@ package com.example.quizzingapplication;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -305,18 +306,25 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void highlightCheckbox(int index, int color) {
+
+        GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
+
+        if (dottedBorder != null) {
+            dottedBorder.setStroke(2, color, 4, 2);
+        }
+
         switch (index) {
             case 0:
-                firstCheckbox.setBackgroundColor(color);
+                firstCheckbox.setBackground(dottedBorder);
                 break;
             case 1:
-                secondCheckbox.setBackgroundColor(color);
+                secondCheckbox.setBackground(dottedBorder);
                 break;
             case 2:
-                thirdCheckbox.setBackgroundColor(color);
+                thirdCheckbox.setBackground(dottedBorder);
                 break;
             case 3:
-                fourthCheckbox.setBackgroundColor(color);
+                fourthCheckbox.setBackground(dottedBorder);
                 break;
         }
     }
@@ -347,11 +355,19 @@ public class QuizActivity extends AppCompatActivity {
         fourthOption.setEnabled(true);
     }
 
+
     private void resetCheckboxColors() {
-        firstCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        secondCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        thirdCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        fourthCheckbox.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
+        GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
+
+        if (dottedBorder != null) {
+            dottedBorder.setStroke(2, R.color.default_purple, 4, 2);
+        }
+
+        firstCheckbox.setBackground(dottedBorder);
+        secondCheckbox.setBackground(dottedBorder);
+        thirdCheckbox.setBackground(dottedBorder);
+        fourthCheckbox.setBackground(dottedBorder);
 
         firstCheckbox.setEnabled(true);
         secondCheckbox.setEnabled(true);
@@ -387,7 +403,7 @@ public class QuizActivity extends AppCompatActivity {
             Collections.sort(correctAnswers);
 
             if (selectedAnswers.equals(correctAnswers)) {
-                score += selectedAnswers.size();
+                score += 1;
                 scoreView.setText(String.valueOf(score));
                 Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
             } else {
