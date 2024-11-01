@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +38,7 @@ public class QuizActivity extends AppCompatActivity {
     private TextView scoreView;
     private TextView questionTypeView;
     private TextView repeatQuestionsView;
+    private TextView timerView;
 
     private Button firstOption;
     private Button secondOption;
@@ -54,10 +56,12 @@ public class QuizActivity extends AppCompatActivity {
     private int score = 0;
 
     private List<Question> incorrectQuestions = new ArrayList<>();
+
     private int repeatCount = 0;
     private final int MAX_REPEATS = 1;
-
     private int selectedOptionIndex = -1;
+    private CountDownTimer countDownTimer;
+    private long timeLeft = 20000;
 
     private Question currentQuestion;
 
@@ -73,6 +77,7 @@ public class QuizActivity extends AppCompatActivity {
         scoreView = findViewById(R.id.score_view);
         questionTypeView = findViewById(R.id.question_type_view);
         repeatQuestionsView = findViewById(R.id.repeat_questions_view);
+        timerView = findViewById(R.id.timer_view);
 
         repeatQuestionsView.setVisibility(View.GONE);
 
@@ -91,6 +96,7 @@ public class QuizActivity extends AppCompatActivity {
         if (!questionList.isEmpty()) {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
+            startTimer();
         } else {
             Toast.makeText(this, "No questions available", Toast.LENGTH_LONG).show();
         }
@@ -149,7 +155,6 @@ public class QuizActivity extends AppCompatActivity {
         return questionList;
     }
 
-    @SuppressLint("SetTextI18n")
     private void displayQuestion(Question question) {
 
         resetVisibility();
@@ -185,6 +190,8 @@ public class QuizActivity extends AppCompatActivity {
         if (currentQuestionIndex < questionList.size()) {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
+            timeLeft = 20000;
+            startTimer();
         } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
             questionList = new ArrayList<>(incorrectQuestions);
             incorrectQuestions.clear();
@@ -194,11 +201,12 @@ public class QuizActivity extends AppCompatActivity {
             Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_LONG).show();
             displayQuestion(currentQuestion);
             repeatQuestionsView.setVisibility(View.VISIBLE);
+            timeLeft = 20000;
+            startTimer();
         } else {
             Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
         }
     }
-
 
     private void resetVisibility() {
         firstOption.setVisibility(View.GONE);
@@ -264,6 +272,7 @@ public class QuizActivity extends AppCompatActivity {
             });
         }
     }
+
     private void setCheckboxes(List<String> options) {
         if (options.size() > 0) {
             firstCheckbox.setText(options.get(0));
@@ -370,7 +379,6 @@ public class QuizActivity extends AppCompatActivity {
         fourthOption.setEnabled(true);
     }
 
-
     private void resetCheckboxColors() {
 
         GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
@@ -390,6 +398,30 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setEnabled(true);
 
         resetCheckboxes();
+    }
+
+    private void startTimer() {
+        countDownTimer = new CountDownTimer(timeLeft, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeft = millisUntilFinished;
+                updateTimer();
+            }
+
+            @Override
+            public void onFinish() {
+                Toast.makeText(QuizActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
+                checkAnswer(currentQuestion);
+            }
+        }.start();
+    }
+
+    private void updateTimer() {
+        int minutes = (int) (timeLeft / 1000) / 60;
+        int seconds = (int) (timeLeft / 1000) % 60;
+
+        String timeLeftFormatted = String.format("%02d:%02d", minutes, seconds);
+        timerView.setText(timeLeftFormatted);
     }
 
     private void checkAnswer(Question question) {
@@ -444,6 +476,8 @@ public class QuizActivity extends AppCompatActivity {
             selectedOptionIndex = -1;
             disableButtons();
         }
+
+        countDownTimer.cancel();
 
         new Handler().postDelayed(this::loadNextQuestion, 2000);
     }

@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="164dp"
-        android:layout_marginTop="76dp"
+        android:layout_marginTop="100dp"
         android:text="Score: "
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,7 +20,7 @@
         android:id="@+id/score_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="76dp"
+        android:layout_marginTop="100dp"
         android:text="0"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,7 +43,7 @@
         android:id="@+id/button_option2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="132dp"
+        android:layout_marginBottom="176dp"
         android:width="250sp"
         android:text="Button"
         android:textColorLink="#673AB7"
@@ -79,7 +79,7 @@
         android:id="@+id/text_question"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="64dp"
         android:text="Question"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -135,7 +135,7 @@
         android:id="@+id/checkbox_option4"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/dotted_border"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
@@ -172,6 +172,7 @@
         android:text="Single"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_question" />
 
@@ -179,7 +180,7 @@
         android:id="@+id/repeat_questions_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
+        android:layout_marginTop="144dp"
         android:background="@drawable/rounded_corners"
         android:paddingLeft="15sp"
         android:paddingTop="5sp"
@@ -187,8 +188,21 @@
         android:paddingBottom="5sp"
         android:text="Repeating incorrect questions"
         android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/text_question"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/timer_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="00:00"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.479"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
