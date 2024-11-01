@@ -36,6 +36,7 @@ public class QuizActivity extends AppCompatActivity {
     private TextView questionView;
     private TextView scoreView;
     private TextView questionTypeView;
+    private TextView repeatQuestionsView;
 
     private Button firstOption;
     private Button secondOption;
@@ -71,6 +72,9 @@ public class QuizActivity extends AppCompatActivity {
         questionView = findViewById(R.id.text_question);
         scoreView = findViewById(R.id.score_view);
         questionTypeView = findViewById(R.id.question_type_view);
+        repeatQuestionsView = findViewById(R.id.repeat_questions_view);
+
+        repeatQuestionsView.setVisibility(View.GONE);
 
         firstOption = findViewById(R.id.button_option1);
         secondOption = findViewById(R.id.button_option2);
@@ -145,7 +149,6 @@ public class QuizActivity extends AppCompatActivity {
         return questionList;
     }
 
-
     @SuppressLint("SetTextI18n")
     private void displayQuestion(Question question) {
 
@@ -172,6 +175,31 @@ public class QuizActivity extends AppCompatActivity {
 
     }
 
+    private void loadNextQuestion() {
+        currentQuestionIndex++;
+
+        resetVisibility();
+        resetButtonColors();
+        resetCheckboxColors();
+
+        if (currentQuestionIndex < questionList.size()) {
+            currentQuestion = questionList.get(currentQuestionIndex);
+            displayQuestion(currentQuestion);
+        } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
+            questionList = new ArrayList<>(incorrectQuestions);
+            incorrectQuestions.clear();
+            currentQuestionIndex = 0;
+            currentQuestion = questionList.get(currentQuestionIndex);
+            repeatCount++;
+            Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_LONG).show();
+            displayQuestion(currentQuestion);
+            repeatQuestionsView.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
     private void resetVisibility() {
         firstOption.setVisibility(View.GONE);
         secondOption.setVisibility(View.GONE);
@@ -184,6 +212,7 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setVisibility(View.GONE);
 
         submitBtn.setVisibility(View.GONE);
+        repeatQuestionsView.setVisibility(View.GONE);
     }
 
     private void setButtons(List<String> options) {
@@ -265,29 +294,6 @@ public class QuizActivity extends AppCompatActivity {
         selectedOptionIndex = -1;
     }
 
-    private void loadNextQuestion() {
-        currentQuestionIndex++;
-
-        resetVisibility();
-        resetButtonColors();
-        resetCheckboxColors();
-
-        if (currentQuestionIndex < questionList.size()) {
-            currentQuestion = questionList.get(currentQuestionIndex);
-            displayQuestion(currentQuestion);
-        } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
-            questionList = new ArrayList<>(incorrectQuestions);
-            incorrectQuestions.clear();
-            currentQuestionIndex = 0;
-            currentQuestion = questionList.get(currentQuestionIndex);
-            repeatCount++;
-            Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_LONG).show();
-            displayQuestion(currentQuestion);
-        } else {
-            Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
-        }
-    }
-
     private void highlightButton(int index, int color) {
         ColorStateList highlightColor = ColorStateList.valueOf(color);
 
@@ -336,6 +342,11 @@ public class QuizActivity extends AppCompatActivity {
         secondOption.setEnabled(false);
         thirdOption.setEnabled(false);
         fourthOption.setEnabled(false);
+
+        firstOption.setTextColor(Color.WHITE);
+        secondOption.setTextColor(Color.WHITE);
+        thirdOption.setTextColor(Color.WHITE);
+        fourthOption.setTextColor(Color.WHITE);
     }
 
     private void disableCheckboxes() {

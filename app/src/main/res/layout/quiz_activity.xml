@@ -43,7 +43,7 @@
         android:id="@+id/button_option2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="208dp"
+        android:layout_marginBottom="132dp"
         android:width="250sp"
         android:text="Button"
         android:textColorLink="#673AB7"
@@ -79,7 +79,7 @@
         android:id="@+id/text_question"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="68dp"
         android:text="Question"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -174,5 +174,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_question" />
+
+    <TextView
+        android:id="@+id/repeat_questions_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/rounded_corners"
+        android:paddingLeft="15sp"
+        android:paddingTop="5sp"
+        android:paddingRight="15sp"
+        android:paddingBottom="5sp"
+        android:text="Repeating incorrect questions"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toTopOf="@+id/text_question"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
