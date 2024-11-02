@@ -1,13 +1,12 @@
 package com.example.quizzingapplication;
 
-import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -51,6 +50,7 @@ public class QuizActivity extends AppCompatActivity {
     private CheckBox fourthCheckbox;
 
     private Button submitBtn;
+    private Button finishBtn;
 
     private int currentQuestionIndex = 0;
     private int score = 0;
@@ -92,6 +92,7 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox = findViewById(R.id.checkbox_option4);
 
         submitBtn = findViewById(R.id.submit_btn);
+        finishBtn = findViewById(R.id.finish_btn);
 
         if (!questionList.isEmpty()) {
             currentQuestion = questionList.get(currentQuestionIndex);
@@ -105,6 +106,13 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 checkAnswer(currentQuestion);
+            }
+        });
+
+        finishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishQuiz();
             }
         });
 
@@ -205,7 +213,15 @@ public class QuizActivity extends AppCompatActivity {
             startTimer();
         } else {
             Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
+            finishQuiz();
         }
+    }
+
+    private void finishQuiz(){
+        Intent intent = new Intent(QuizActivity.this, ResultsActivity.class);
+        intent.putExtra("score", score);
+        startActivity(intent);
+        finish();
     }
 
     private void resetVisibility() {
