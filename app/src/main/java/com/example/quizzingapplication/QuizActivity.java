@@ -32,6 +32,10 @@ import java.util.Objects;
 public class QuizActivity extends AppCompatActivity {
 
     private List<Question> questionList;
+    private List<Question> incorrectQuestions = new ArrayList<>();
+    private List<Quiz> quizList;
+    private Quiz currentQuiz;
+
 
     private TextView questionView;
     private TextView scoreView;
@@ -54,15 +58,11 @@ public class QuizActivity extends AppCompatActivity {
 
     private int currentQuestionIndex = 0;
     private int score = 0;
-
-    private List<Question> incorrectQuestions = new ArrayList<>();
-
     private int repeatCount = 0;
     private final int MAX_REPEATS = 1;
     private int selectedOptionIndex = -1;
-    private CountDownTimer countDownTimer;
+    private CountDownTimer timer;
     private long timeLeft = 20000;
-
     private Question currentQuestion;
 
     @Override
@@ -71,7 +71,7 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.quiz_activity);
 
-        questionList = loadQuestions();
+        quizList = loadQuizzes();
 
         questionView = findViewById(R.id.text_question);
         scoreView = findViewById(R.id.score_view);
@@ -94,12 +94,15 @@ public class QuizActivity extends AppCompatActivity {
         submitBtn = findViewById(R.id.submit_btn);
         finishBtn = findViewById(R.id.finish_btn);
 
-        if (!questionList.isEmpty()) {
-            currentQuestion = questionList.get(currentQuestionIndex);
-            displayQuestion(currentQuestion);
-            startTimer();
+        if (!quizList.isEmpty()) {
+            currentQuiz = quizList.get(0);
+            questionList = currentQuiz.getQuestions();
+            startTimer(currentQuiz.getTimerDuration());
+            if (!questionList.isEmpty()) {
+                displayQuestion(questionList.get(currentQuestionIndex));
+            }
         } else {
-            Toast.makeText(this, "No questions available", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No quizzes available", Toast.LENGTH_LONG).show();
         }
 
         submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -119,48 +122,60 @@ public class QuizActivity extends AppCompatActivity {
         scoreView.setText(String.valueOf(score));
     }
 
-    private List<Question> loadQuestions() {
-        List<Question> questionList = new ArrayList<>();
+    private List<Quiz> loadQuizzes() {
+        List<Quiz> quizList = new ArrayList<>();
 
-        try{
-            InputStream is = getAssets().open("questions.json");
+        try {
+            InputStream is = getAssets().open("quizzes.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
 
-            String json = new String(buffer, StandardCharsets.UTF_8);
-            JSONArray jsonArray = new JSONArray(json);
+            String json = new String(buffer, "UTF-8");
+            JSONArray quizArray = new JSONArray(json);
 
-            for (int i = 0; i < jsonArray.length(); i++){
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
+            for (int i = 0; i < quizArray.length(); i++) {
+                JSONObject quizObject = quizArray.getJSONObject(i);
 
-                String text = jsonObject.getString("text");
-                String type = jsonObject.getString("type");
+                String name = quizObject.getString("name");
+                int timerDuration = quizObject.getInt("timer_duration");
 
-                JSONArray optionsArray = jsonObject.getJSONArray("options");
-                List<String> options = new ArrayList<>();
-                for (int j = 0; j < optionsArray.length(); j++){
-                    options.add(optionsArray.getString(j));
+                JSONArray questionsArray = quizObject.getJSONArray("questions");
+                List<Question> questionList = new ArrayList<>();
+
+                for (int j = 0; j < questionsArray.length(); j++) {
+                    JSONObject questionObject = questionsArray.getJSONObject(j);
+
+                    String text = questionObject.getString("text");
+                    String type = questionObject.getString("type");
+
+                    JSONArray optionsArray = questionObject.getJSONArray("options");
+                    List<String> options = new ArrayList<>();
+                    for (int k = 0; k < optionsArray.length(); k++) {
+                        options.add(optionsArray.getString(k));
+                    }
+
+                    JSONArray answersArray = questionObject.getJSONArray("answers");
+                    List<Integer> correctAnswers = new ArrayList<>();
+                    for (int k = 0; k < answersArray.length(); k++) {
+                        correctAnswers.add(answersArray.getInt(k));
+                    }
+
+                    Question question = new Question(text, type, options, correctAnswers);
+                    questionList.add(question);
                 }
 
-                JSONArray answersArray = jsonObject.getJSONArray("answers");
-                List<Integer> correctAnswers = new ArrayList<>();
-                for (int j = 0; j < answersArray.length(); j++) {
-                    correctAnswers.add(answersArray.getInt(j));
-                }
-
-                Question question = new Question(text, type, options, correctAnswers);
-                questionList.add(question);
-
+                Quiz quiz = new Quiz(name, questionList, timerDuration);
+                quizList.add(quiz);
             }
 
-        } catch (IOException | JSONException e){
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error loading questions", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error loading quizzes", Toast.LENGTH_LONG).show();
         }
 
-        return questionList;
+        return quizList;
     }
 
     private void displayQuestion(Question question) {
@@ -199,20 +214,18 @@ public class QuizActivity extends AppCompatActivity {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
             timeLeft = 20000;
-            startTimer();
         } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
             questionList = new ArrayList<>(incorrectQuestions);
             incorrectQuestions.clear();
             currentQuestionIndex = 0;
             currentQuestion = questionList.get(currentQuestionIndex);
             repeatCount++;
-            Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_SHORT).show();
             displayQuestion(currentQuestion);
             repeatQuestionsView.setVisibility(View.VISIBLE);
             timeLeft = 20000;
-            startTimer();
         } else {
-            Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_SHORT).show();
             finishQuiz();
         }
     }
@@ -416,18 +429,19 @@ public class QuizActivity extends AppCompatActivity {
         resetCheckboxes();
     }
 
-    private void startTimer() {
-        countDownTimer = new CountDownTimer(timeLeft, 1000) {
+    private void startTimer(int duration) {
+        timer = new CountDownTimer(duration * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                timeLeft = millisUntilFinished;
-                updateTimer();
+                // Update your timer UI
+                // Example: timerTextView.setText(String.valueOf(millisUntilFinished / 1000));
             }
 
             @Override
             public void onFinish() {
+                // Handle quiz timeout
                 Toast.makeText(QuizActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
-                checkAnswer(currentQuestion);
+                loadNextQuestion();
             }
         }.start();
     }
@@ -493,9 +507,17 @@ public class QuizActivity extends AppCompatActivity {
             disableButtons();
         }
 
-        countDownTimer.cancel();
+        timer.cancel();
 
         new Handler().postDelayed(this::loadNextQuestion, 2000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (timer != null) {
+            timer.cancel();
+        }
+        super.onDestroy();
     }
 
 }

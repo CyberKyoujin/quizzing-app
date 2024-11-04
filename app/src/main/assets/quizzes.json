@@ -1,0 +1,26 @@
+[
+  {
+    "name": "City Quiz",
+    "timer_duration": 30,
+    "questions": [
+      {
+        "text": "What is the capital of Great Britain?",
+        "type": "single",
+        "options": ["Paris", "London", "Amsterdam", "New York"],
+        "answers": [1]
+      }
+    ]
+  },
+  {
+    "name": "Geo Quiz",
+    "timer_duration": 20,
+    "questions": [
+      {
+        "text": "Which planets are gas giants?",
+        "type": "multiple choice",
+        "options": ["Earth", "Jupiter", "Mars", "Saturn"],
+        "answers": [1, 3]
+      }
+    ]
+  }
+]
