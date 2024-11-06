@@ -16,29 +16,17 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class QuizActivity extends AppCompatActivity {
 
-    private List<Question> questionList;
-    private List<Question> incorrectQuestions = new ArrayList<>();
-    private List<Quiz> quizList;
-    private Quiz currentQuiz;
-
-
     private TextView questionView;
     private TextView scoreView;
+    private TextView titleView;
     private TextView questionTypeView;
     private TextView repeatQuestionsView;
     private TextView timerView;
@@ -61,25 +49,27 @@ public class QuizActivity extends AppCompatActivity {
     private int repeatCount = 0;
     private final int MAX_REPEATS = 1;
     private int selectedOptionIndex = -1;
+    private Question currentQuestion;
+
     private CountDownTimer timer;
     private long timeLeft = 20000;
-    private Question currentQuestion;
+
+    private String quizName;
+    private int timerDuration;
+    private List<Question> questionList;
+    private List<Question> incorrectQuestions = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.quiz_activity);
-
-        quizList = loadQuizzes();
 
         questionView = findViewById(R.id.text_question);
         scoreView = findViewById(R.id.score_view);
         questionTypeView = findViewById(R.id.question_type_view);
         repeatQuestionsView = findViewById(R.id.repeat_questions_view);
         timerView = findViewById(R.id.timer_view);
-
-        repeatQuestionsView.setVisibility(View.GONE);
+        titleView = findViewById(R.id.title_view);
 
         firstOption = findViewById(R.id.button_option1);
         secondOption = findViewById(R.id.button_option2);
@@ -94,15 +84,20 @@ public class QuizActivity extends AppCompatActivity {
         submitBtn = findViewById(R.id.submit_btn);
         finishBtn = findViewById(R.id.finish_btn);
 
-        if (!quizList.isEmpty()) {
-            currentQuiz = quizList.get(0);
-            questionList = currentQuiz.getQuestions();
-            startTimer(currentQuiz.getTimerDuration());
-            if (!questionList.isEmpty()) {
-                displayQuestion(questionList.get(currentQuestionIndex));
-            }
+        repeatQuestionsView.setVisibility(View.GONE);
+
+        quizName = getIntent().getStringExtra("quiz_name");
+        timerDuration = getIntent().getIntExtra("quiz_timer_duration", 30);
+        questionList = getIntent().getParcelableArrayListExtra("quiz_questions");
+
+        if (questionList != null && !questionList.isEmpty()) {
+            setTitle(quizName);
+
+            currentQuestion = questionList.get(currentQuestionIndex);
+            displayQuestion(currentQuestion);
         } else {
-            Toast.makeText(this, "No quizzes available", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No questions available", Toast.LENGTH_LONG).show();
+            finish();
         }
 
         submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -120,62 +115,7 @@ public class QuizActivity extends AppCompatActivity {
         });
 
         scoreView.setText(String.valueOf(score));
-    }
-
-    private List<Quiz> loadQuizzes() {
-        List<Quiz> quizList = new ArrayList<>();
-
-        try {
-            InputStream is = getAssets().open("quizzes.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-
-            String json = new String(buffer, "UTF-8");
-            JSONArray quizArray = new JSONArray(json);
-
-            for (int i = 0; i < quizArray.length(); i++) {
-                JSONObject quizObject = quizArray.getJSONObject(i);
-
-                String name = quizObject.getString("name");
-                int timerDuration = quizObject.getInt("timer_duration");
-
-                JSONArray questionsArray = quizObject.getJSONArray("questions");
-                List<Question> questionList = new ArrayList<>();
-
-                for (int j = 0; j < questionsArray.length(); j++) {
-                    JSONObject questionObject = questionsArray.getJSONObject(j);
-
-                    String text = questionObject.getString("text");
-                    String type = questionObject.getString("type");
-
-                    JSONArray optionsArray = questionObject.getJSONArray("options");
-                    List<String> options = new ArrayList<>();
-                    for (int k = 0; k < optionsArray.length(); k++) {
-                        options.add(optionsArray.getString(k));
-                    }
-
-                    JSONArray answersArray = questionObject.getJSONArray("answers");
-                    List<Integer> correctAnswers = new ArrayList<>();
-                    for (int k = 0; k < answersArray.length(); k++) {
-                        correctAnswers.add(answersArray.getInt(k));
-                    }
-
-                    Question question = new Question(text, type, options, correctAnswers);
-                    questionList.add(question);
-                }
-
-                Quiz quiz = new Quiz(name, questionList, timerDuration);
-                quizList.add(quiz);
-            }
-
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error loading quizzes", Toast.LENGTH_LONG).show();
-        }
-
-        return quizList;
+        titleView.setText(quizName);
     }
 
     private void displayQuestion(Question question) {
@@ -184,7 +124,6 @@ public class QuizActivity extends AppCompatActivity {
         resetButtonColors();
         resetCheckboxColors();
 
-        // Set the question text
         questionView.setText(question.getText());
         List<String> options = question.getOptions();
         List<Integer> answers = question.getCorrectAnswers();
@@ -193,7 +132,7 @@ public class QuizActivity extends AppCompatActivity {
         if (Objects.equals(questionType, "multiple choice")) {
             // Multiple-answer question: checkboxes
             setCheckboxes(options);
-            questionTypeView.setText("Multiple - " + answers.size() + " correct answers");
+            questionTypeView.setText(String.format("Multiple - %d correct answers", answers.size()));
             submitBtn.setVisibility(View.VISIBLE);
         } else if (Objects.equals(questionType, "single")) {
             // Single-answer question: buttons
@@ -201,19 +140,16 @@ public class QuizActivity extends AppCompatActivity {
             questionTypeView.setText("Single");
         }
 
+        startTimer(timerDuration);
     }
 
     private void loadNextQuestion() {
         currentQuestionIndex++;
 
-        resetVisibility();
-        resetButtonColors();
-        resetCheckboxColors();
-
         if (currentQuestionIndex < questionList.size()) {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
-            timeLeft = 20000;
+            timeLeft = timerDuration * 1000L;
         } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
             questionList = new ArrayList<>(incorrectQuestions);
             incorrectQuestions.clear();
@@ -221,9 +157,9 @@ public class QuizActivity extends AppCompatActivity {
             currentQuestion = questionList.get(currentQuestionIndex);
             repeatCount++;
             Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_SHORT).show();
-            displayQuestion(currentQuestion);
             repeatQuestionsView.setVisibility(View.VISIBLE);
-            timeLeft = 20000;
+            displayQuestion(currentQuestion);
+            timeLeft = timerDuration * 1000L;
         } else {
             Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_SHORT).show();
             finishQuiz();
@@ -231,6 +167,10 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void finishQuiz(){
+        if (timer != null) {
+            timer.cancel();
+        }
+
         Intent intent = new Intent(QuizActivity.this, ResultsActivity.class);
         intent.putExtra("score", score);
         startActivity(intent);
@@ -249,7 +189,6 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setVisibility(View.GONE);
 
         submitBtn.setVisibility(View.GONE);
-        repeatQuestionsView.setVisibility(View.GONE);
     }
 
     private void setButtons(List<String> options) {
@@ -328,10 +267,6 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setChecked(false);
     }
 
-    private void resetButtons() {
-        selectedOptionIndex = -1;
-    }
-
     private void highlightButton(int index, int color) {
         ColorStateList highlightColor = ColorStateList.valueOf(color);
 
@@ -348,6 +283,8 @@ public class QuizActivity extends AppCompatActivity {
             case 3:
                 fourthOption.setBackgroundTintList(highlightColor);
                 break;
+            default:
+                break;
         }
     }
 
@@ -356,7 +293,7 @@ public class QuizActivity extends AppCompatActivity {
         GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
 
         if (dottedBorder != null) {
-            dottedBorder.setStroke(2, color, 4, 2);
+            dottedBorder.setStroke(2, ContextCompat.getColor(this, color), 4, 2);
         }
 
         switch (index) {
@@ -371,6 +308,8 @@ public class QuizActivity extends AppCompatActivity {
                 break;
             case 3:
                 fourthCheckbox.setBackground(dottedBorder);
+                break;
+            default:
                 break;
         }
     }
@@ -406,6 +345,11 @@ public class QuizActivity extends AppCompatActivity {
         secondOption.setEnabled(true);
         thirdOption.setEnabled(true);
         fourthOption.setEnabled(true);
+
+        firstOption.setTextColor(Color.WHITE);
+        secondOption.setTextColor(Color.WHITE);
+        thirdOption.setTextColor(Color.WHITE);
+        fourthOption.setTextColor(Color.WHITE);
     }
 
     private void resetCheckboxColors() {
@@ -413,13 +357,18 @@ public class QuizActivity extends AppCompatActivity {
         GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
 
         if (dottedBorder != null) {
-            dottedBorder.setStroke(2, R.color.default_purple, 4, 2);
+            dottedBorder.setStroke(2, ContextCompat.getColor(this, R.color.default_purple), 4, 2);
         }
 
         firstCheckbox.setBackground(dottedBorder);
         secondCheckbox.setBackground(dottedBorder);
         thirdCheckbox.setBackground(dottedBorder);
         fourthCheckbox.setBackground(dottedBorder);
+
+        firstCheckbox.setTextColor(ContextCompat.getColor(this, R.color.black));
+        secondCheckbox.setTextColor(ContextCompat.getColor(this, R.color.black));
+        thirdCheckbox.setTextColor(ContextCompat.getColor(this, R.color.black));
+        fourthCheckbox.setTextColor(ContextCompat.getColor(this, R.color.black));
 
         firstCheckbox.setEnabled(true);
         secondCheckbox.setEnabled(true);
@@ -430,16 +379,20 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void startTimer(int duration) {
+
+        if (timer != null) {
+            timer.cancel();
+        }
+
         timer = new CountDownTimer(duration * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                // Update your timer UI
-                // Example: timerTextView.setText(String.valueOf(millisUntilFinished / 1000));
+                timeLeft = millisUntilFinished;
+                updateTimer();
             }
 
             @Override
             public void onFinish() {
-                // Handle quiz timeout
                 Toast.makeText(QuizActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
                 loadNextQuestion();
             }
@@ -447,17 +400,16 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void updateTimer() {
-        int minutes = (int) (timeLeft / 1000) / 60;
         int seconds = (int) (timeLeft / 1000) % 60;
+        int minutes = (int) ((timeLeft / (1000 * 60)) % 60);
 
-        String timeLeftFormatted = String.format("%02d:%02d", minutes, seconds);
-        timerView.setText(timeLeftFormatted);
+        String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+        timerView.setText(timeFormatted);
     }
 
     private void checkAnswer(Question question) {
         List<Integer> selectedAnswers = new ArrayList<>();
         List<Integer> correctAnswers = question.getCorrectAnswers();
-        int correctAnswerIndex = correctAnswers.get(0);
 
         if (Objects.equals(question.getType(), "multiple choice")) {
 
@@ -467,12 +419,12 @@ public class QuizActivity extends AppCompatActivity {
             if (fourthCheckbox.isChecked()) selectedAnswers.add(3);
 
             for (int index : correctAnswers) {
-                highlightCheckbox(index, Color.GREEN);
+                highlightCheckbox(index, R.color.green);
             }
 
             for (int index : selectedAnswers) {
                 if (!correctAnswers.contains(index)) {
-                    highlightCheckbox(index, Color.RED);
+                    highlightCheckbox(index, R.color.red);
                 }
             }
 
@@ -491,25 +443,39 @@ public class QuizActivity extends AppCompatActivity {
             disableCheckboxes();
 
         } else if (Objects.equals(question.getType(), "single")) {
+            if (selectedOptionIndex == -1) {
+                Toast.makeText(this, "Please select an option.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int correctAnswerIndex = correctAnswers.get(0);
             highlightButton(correctAnswerIndex, Color.GREEN);
 
-            if (selectedOptionIndex == correctAnswers.get(0)) {
+            if (selectedOptionIndex == correctAnswerIndex) {
                 Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += 1;
                 scoreView.setText(String.valueOf(score));
             } else {
                 highlightButton(selectedOptionIndex, Color.RED);
                 Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
-                incorrectQuestions.add(currentQuestion);
+                incorrectQuestions.add(question);
             }
 
-            selectedOptionIndex = -1;
             disableButtons();
+            selectedOptionIndex = -1;
         }
 
-        timer.cancel();
+        if (timer != null) {
+            timer.cancel();
+        }
 
-        new Handler().postDelayed(this::loadNextQuestion, 2000);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadNextQuestion();
+            }
+        }, 2000);
+
     }
 
     @Override
@@ -519,5 +485,4 @@ public class QuizActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
 }

@@ -1,34 +1,59 @@
 package com.example.quizzingapplication;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.util.List;
 
-public class Question {
-
+public class Question implements Parcelable {
     private String text;
     private String type;
     private List<String> options;
     private List<Integer> correctAnswers;
 
-    public Question(String text, String type, List<String> options, List<Integer> correctAnswers){
+    // Constructor
+    public Question(String text, String type, List<String> options, List<Integer> correctAnswers) {
         this.text = text;
         this.type = type;
         this.options = options;
         this.correctAnswers = correctAnswers;
     }
 
-    public String getText() {
-        return text;
+    // Getters
+    public String getText() { return text; }
+    public String getType() { return type; }
+    public List<String> getOptions() { return options; }
+    public List<Integer> getCorrectAnswers() { return correctAnswers; }
+
+    // Parcelable implementation
+    protected Question(Parcel in) {
+        text = in.readString();
+        type = in.readString();
+        options = in.createStringArrayList();
+        correctAnswers = in.readArrayList(Integer.class.getClassLoader());
     }
 
-    public String getType() {
-        return type;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(text);
+        dest.writeString(type);
+        dest.writeStringList(options);
+        dest.writeList(correctAnswers);
     }
 
-    public List<Integer> getCorrectAnswers() {
-        return correctAnswers;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public List<String> getOptions() {
-        return options;
-    }
+    public static final Creator<Question> CREATOR = new Creator<Question>() {
+        @Override
+        public Question createFromParcel(Parcel in) {
+            return new Question(in);
+        }
+
+        @Override
+        public Question[] newArray(int size) {
+            return new Question[size];
+        }
+    };
 }

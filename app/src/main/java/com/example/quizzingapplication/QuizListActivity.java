@@ -2,6 +2,7 @@ package com.example.quizzingapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +36,6 @@ public class QuizListActivity extends AppCompatActivity implements QuizAdapter.O
 
         quizzesRecyclerView = findViewById(R.id.quizzes_recycler_view);
 
-        // Load quizzes (assuming you have a method loadQuizzes() that returns a List<Quiz>)
         quizList = loadQuizzes();
         if (quizList.isEmpty()) {
             Toast.makeText(this, "No quizzes available", Toast.LENGTH_LONG).show();
@@ -48,12 +48,11 @@ public class QuizListActivity extends AppCompatActivity implements QuizAdapter.O
 
     @Override
     public void onQuizClick(Quiz quiz) {
-        // Handle quiz click: Start QuizActivity with selected quiz
+
         Intent intent = new Intent(this, QuizActivity.class);
         intent.putExtra("quiz_name", quiz.getName());
         intent.putExtra("quiz_timer_duration", quiz.getTimerDuration());
-        // You might also pass the list of questions if needed
-        // intent.putParcelableArrayListExtra("quiz_questions", (ArrayList<? extends Parcelable>) quiz.getQuestions());
+        intent.putParcelableArrayListExtra("quiz_questions", (ArrayList<? extends Parcelable>) quiz.getQuestions());
         startActivity(intent);
     }
 
