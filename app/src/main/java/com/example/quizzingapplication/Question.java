@@ -4,13 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.List;
 
+
+// Question class, implements Parcelable to pass questions via Intents
+
 public class Question implements Parcelable {
     private String text;
     private String type;
     private List<String> options;
     private List<Integer> correctAnswers;
 
-    // Constructor
+    // Constructor class
     public Question(String text, String type, List<String> options, List<Integer> correctAnswers) {
         this.text = text;
         this.type = type;
@@ -24,7 +27,7 @@ public class Question implements Parcelable {
     public List<String> getOptions() { return options; }
     public List<Integer> getCorrectAnswers() { return correctAnswers; }
 
-    // Parcelable implementation
+    // Parcelable constructor
     protected Question(Parcel in) {
         text = in.readString();
         type = in.readString();
@@ -32,6 +35,7 @@ public class Question implements Parcelable {
         correctAnswers = in.readArrayList(Integer.class.getClassLoader());
     }
 
+    // Method to write the data to the Parcel
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(text);

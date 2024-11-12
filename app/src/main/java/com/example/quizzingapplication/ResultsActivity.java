@@ -47,12 +47,18 @@ public class ResultsActivity extends AppCompatActivity {
         });
     }
 
+    // Method to restart a quiz (passing quiz data to the Quiz Activity)
     private void restartQuiz () {
         Intent intent = new Intent(ResultsActivity.this, QuizActivity.class);
+
+        intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
+        intent.putExtra("quiz_timer_duration", getIntent().getIntExtra("quiz_timer_duration", 30));
+        intent.putParcelableArrayListExtra("quiz_questions", getIntent().getParcelableArrayListExtra("quiz_questions"));
+
         startActivity(intent);
         finish();
     }
-
+    // Method to navigate to the main menu
     private void navigateToMenu() {
         Intent intent = new Intent(ResultsActivity.this, MainActivity.class);
         startActivity(intent);

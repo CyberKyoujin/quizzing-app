@@ -3,8 +3,11 @@ package com.example.quizzingapplication;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,15 +22,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// Activity to display quiz list
 public class QuizListActivity extends AppCompatActivity implements QuizAdapter.OnQuizClickListener {
 
     private RecyclerView quizzesRecyclerView;
+    private QuizAdapter quizAdapter;
     private List<Quiz> quizList;
+
+    private ImageButton createQuizButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,36 +46,101 @@ public class QuizListActivity extends AppCompatActivity implements QuizAdapter.O
         setContentView(R.layout.quiz_list_activity);
 
         quizzesRecyclerView = findViewById(R.id.quizzes_recycler_view);
-
-        quizList = loadQuizzes();
-        if (quizList.isEmpty()) {
-            Toast.makeText(this, "No quizzes available", Toast.LENGTH_LONG).show();
-        }
-
-        QuizAdapter adapter = new QuizAdapter(this, quizList, this);
         quizzesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        quizzesRecyclerView.setAdapter(adapter);
+
+        createQuizButton = findViewById(R.id.create_quiz_btn);
+
+        // Create new quiz
+        createQuizButton.setOnClickListener(view -> {
+            Intent intent = new Intent(QuizListActivity.this, CreateQuizActivity.class);
+            startActivity(intent);
+        });
+
+        loadAndDisplayQuizzes();
     }
 
     @Override
-    public void onQuizClick(Quiz quiz) {
+    protected void onResume() {
+        super.onResume();
+        loadAndDisplayQuizzes();
 
+    }
+    // Loading quizzes and creating adapter object
+    private void loadAndDisplayQuizzes() {
+        quizList = loadQuizzes();
+        quizAdapter = new QuizAdapter(this, quizList, this);
+        quizzesRecyclerView.setAdapter(quizAdapter);
+    }
+    // Start quiz on click
+    @Override
+    public void onQuizClick(Quiz quiz) {
         Intent intent = new Intent(this, QuizActivity.class);
         intent.putExtra("quiz_name", quiz.getName());
         intent.putExtra("quiz_timer_duration", quiz.getTimerDuration());
-        intent.putParcelableArrayListExtra("quiz_questions", (ArrayList<? extends Parcelable>) quiz.getQuestions());
+        intent.putParcelableArrayListExtra("quiz_questions", new ArrayList<>(quiz.getQuestions()));
         startActivity(intent);
     }
+    // Delete quiz on click
+    @Override
+    public void onDeleteQuizClick(Quiz quiz) {
+        // Confirm alert
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Quiz")
+                .setMessage("Are you sure you want to delete this quiz?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    quizAdapter.deleteQuiz(quiz); // Update RecyclerView
+                    deleteQuiz(quiz);     // Delete quiz from JSON
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+    // Method to delete a quiz and update file
+    private void deleteQuiz(Quiz quiz) {
+        try {
+            // Get the JSON file from internal storage
+            File file = new File(getFilesDir(), "quizzes.json");
+            FileInputStream fis = new FileInputStream(file);
+            byte[] buffer = new byte[(int) file.length()];
+            fis.read(buffer);
+            fis.close();
 
+            // Parse the JSON data
+            String json = new String(buffer, "UTF-8");
+            JSONArray quizArray = new JSONArray(json);
+
+            // Remove the quiz by name
+            for (int i = 0; i < quizArray.length(); i++) {
+                JSONObject quizObject = quizArray.getJSONObject(i);
+                if (quizObject.getString("name").equals(quiz.getName())) {
+                    quizArray.remove(i);
+                    break;
+                }
+            }
+
+            // Write the updated JSON back to the file
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(quizArray.toString().getBytes("UTF-8"));
+            fos.close();
+
+            Toast.makeText(this, "Quiz deleted", Toast.LENGTH_SHORT).show();
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error deleting quiz", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // Method to load quizzes from internal storage
     private List<Quiz> loadQuizzes() {
         List<Quiz> quizList = new ArrayList<>();
 
         try {
-            InputStream is = getAssets().open("quizzes.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
+            File file = new File(getFilesDir(), "quizzes.json");
+            FileInputStream fis = new FileInputStream(file);
+
+            byte[] buffer = new byte[(int) file.length()];
+            fis.read(buffer);
+            fis.close();
 
             String json = new String(buffer, "UTF-8");
             JSONArray quizArray = new JSONArray(json);
@@ -112,6 +188,7 @@ public class QuizListActivity extends AppCompatActivity implements QuizAdapter.O
         return quizList;
     }
 }
+
 
 
 

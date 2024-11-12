@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+// Class for Quiz Activity
+
 public class QuizActivity extends AppCompatActivity {
 
     private TextView questionView;
@@ -47,7 +49,6 @@ public class QuizActivity extends AppCompatActivity {
     private int currentQuestionIndex = 0;
     private int score = 0;
     private int repeatCount = 0;
-    private final int MAX_REPEATS = 1;
     private int selectedOptionIndex = -1;
     private Question currentQuestion;
 
@@ -86,20 +87,30 @@ public class QuizActivity extends AppCompatActivity {
 
         repeatQuestionsView.setVisibility(View.GONE);
 
+        score = 0;
+        currentQuestionIndex = 0;
+        incorrectQuestions.clear();
+
+        // Getting quiz data from Intent
+
         quizName = getIntent().getStringExtra("quiz_name");
         timerDuration = getIntent().getIntExtra("quiz_timer_duration", 30);
         questionList = getIntent().getParcelableArrayListExtra("quiz_questions");
 
+
+        // Setting quiz data to the UI
         if (questionList != null && !questionList.isEmpty()) {
             setTitle(quizName);
 
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
         } else {
-            Toast.makeText(this, "No questions available", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No questions.", Toast.LENGTH_LONG).show();
             finish();
         }
 
+
+        // Submit answer
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,6 +118,7 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        // Finish quiz
         finishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,10 +126,11 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        // Initialize score and quiz title
         scoreView.setText(String.valueOf(score));
         titleView.setText(quizName);
     }
-
+    // Method to display a question
     private void displayQuestion(Question question) {
 
         resetVisibility();
@@ -138,45 +151,58 @@ public class QuizActivity extends AppCompatActivity {
             // Single-answer question: buttons
             setButtons(options);
             questionTypeView.setText("Single");
+
         }
 
         startTimer(timerDuration);
     }
 
+    // Method to load next question
     private void loadNextQuestion() {
         currentQuestionIndex++;
-
+        // Specify the repeats count
+        int MAX_REPEATS = 1;
+        // Starting with the main questions list
         if (currentQuestionIndex < questionList.size()) {
             currentQuestion = questionList.get(currentQuestionIndex);
             displayQuestion(currentQuestion);
             timeLeft = timerDuration * 1000L;
+
         } else if (!incorrectQuestions.isEmpty() && repeatCount < MAX_REPEATS) {
+            // Repeating questions
             questionList = new ArrayList<>(incorrectQuestions);
             incorrectQuestions.clear();
             currentQuestionIndex = 0;
             currentQuestion = questionList.get(currentQuestionIndex);
             repeatCount++;
-            Toast.makeText(this, "Repeating incorrect questions", Toast.LENGTH_SHORT).show();
             repeatQuestionsView.setVisibility(View.VISIBLE);
             displayQuestion(currentQuestion);
             timeLeft = timerDuration * 1000L;
         } else {
+            // Finish quiz if no questions left
             Toast.makeText(this, "Quiz Finished!", Toast.LENGTH_SHORT).show();
             finishQuiz();
         }
     }
 
     private void finishQuiz(){
+
+        // Deactivate timer
         if (timer != null) {
             timer.cancel();
         }
 
+        // Pass the quiz data to ResultsActivity
         Intent intent = new Intent(QuizActivity.this, ResultsActivity.class);
         intent.putExtra("score", score);
+        intent.putExtra("quiz_name", quizName);
+        intent.putExtra("quiz_timer_duration", timerDuration);
+        intent.putParcelableArrayListExtra("quiz_questions", new ArrayList<>(questionList)); // Parcelable
         startActivity(intent);
         finish();
     }
 
+    // Reset visibility of UI elements after each question
     private void resetVisibility() {
         firstOption.setVisibility(View.GONE);
         secondOption.setVisibility(View.GONE);
@@ -191,6 +217,8 @@ public class QuizActivity extends AppCompatActivity {
         submitBtn.setVisibility(View.GONE);
     }
 
+
+    // Set buttons for single answer questions
     private void setButtons(List<String> options) {
         if (options.size() > 0) {
             firstOption.setText(options.get(0));
@@ -240,7 +268,7 @@ public class QuizActivity extends AppCompatActivity {
             });
         }
     }
-
+    // Set checkboxes for single answer questions
     private void setCheckboxes(List<String> options) {
         if (options.size() > 0) {
             firstCheckbox.setText(options.get(0));
@@ -267,6 +295,8 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setChecked(false);
     }
 
+
+    // Method to highlight a button depending on answer
     private void highlightButton(int index, int color) {
         ColorStateList highlightColor = ColorStateList.valueOf(color);
 
@@ -287,7 +317,7 @@ public class QuizActivity extends AppCompatActivity {
                 break;
         }
     }
-
+    // Method to highlight a checkbox border depending on answer
     private void highlightCheckbox(int index, int color) {
 
         GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
@@ -314,6 +344,7 @@ public class QuizActivity extends AppCompatActivity {
         }
     }
 
+    // Disable buttons after submitting answer
     private void disableButtons() {
         firstOption.setEnabled(false);
         secondOption.setEnabled(false);
@@ -325,7 +356,7 @@ public class QuizActivity extends AppCompatActivity {
         thirdOption.setTextColor(Color.WHITE);
         fourthOption.setTextColor(Color.WHITE);
     }
-
+    // Disable checkboxes after submitting answer
     private void disableCheckboxes() {
         firstCheckbox.setEnabled(false);
         secondCheckbox.setEnabled(false);
@@ -333,6 +364,7 @@ public class QuizActivity extends AppCompatActivity {
         fourthCheckbox.setEnabled(false);
     }
 
+    // Resetting button colors for each new question
     private void resetButtonColors() {
         ColorStateList defaultColor = ContextCompat.getColorStateList(this, R.color.default_purple);
 
@@ -351,7 +383,7 @@ public class QuizActivity extends AppCompatActivity {
         thirdOption.setTextColor(Color.WHITE);
         fourthOption.setTextColor(Color.WHITE);
     }
-
+    // Resetting checkbox colors for each new question
     private void resetCheckboxColors() {
 
         GradientDrawable dottedBorder = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.dotted_border);
@@ -378,6 +410,7 @@ public class QuizActivity extends AppCompatActivity {
         resetCheckboxes();
     }
 
+    // Start timer after displaying question
     private void startTimer(int duration) {
 
         if (timer != null) {
@@ -394,11 +427,13 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 Toast.makeText(QuizActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
+                // Load new question if the time is up
                 loadNextQuestion();
             }
         }.start();
     }
 
+    // Method to update timerView
     private void updateTimer() {
         int seconds = (int) (timeLeft / 1000) % 60;
         int minutes = (int) ((timeLeft / (1000 * 60)) % 60);
@@ -407,21 +442,25 @@ public class QuizActivity extends AppCompatActivity {
         timerView.setText(timeFormatted);
     }
 
+    // Method to check answer after submission
     private void checkAnswer(Question question) {
         List<Integer> selectedAnswers = new ArrayList<>();
         List<Integer> correctAnswers = question.getCorrectAnswers();
 
         if (Objects.equals(question.getType(), "multiple choice")) {
 
+            // Get selected answers
             if (firstCheckbox.isChecked()) selectedAnswers.add(0);
             if (secondCheckbox.isChecked()) selectedAnswers.add(1);
             if (thirdCheckbox.isChecked()) selectedAnswers.add(2);
             if (fourthCheckbox.isChecked()) selectedAnswers.add(3);
 
+            // Correct answer - highlight checkbox with green
             for (int index : correctAnswers) {
                 highlightCheckbox(index, R.color.green);
             }
 
+            // Wrong answer - highlight checkbox with red
             for (int index : selectedAnswers) {
                 if (!correctAnswers.contains(index)) {
                     highlightCheckbox(index, R.color.red);
@@ -432,6 +471,7 @@ public class QuizActivity extends AppCompatActivity {
             Collections.sort(correctAnswers);
 
             if (selectedAnswers.equals(correctAnswers)) {
+                // Update score
                 score += 1;
                 scoreView.setText(String.valueOf(score));
                 Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
@@ -439,16 +479,20 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
                 incorrectQuestions.add(question);
             }
-
+            // Disable after submission
             disableCheckboxes();
 
         } else if (Objects.equals(question.getType(), "single")) {
+
+            // Check whether an option was selected
             if (selectedOptionIndex == -1) {
                 Toast.makeText(this, "Please select an option.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             int correctAnswerIndex = correctAnswers.get(0);
+
+            // Correct answer - highlight button with green
             highlightButton(correctAnswerIndex, Color.GREEN);
 
             if (selectedOptionIndex == correctAnswerIndex) {
@@ -456,19 +500,24 @@ public class QuizActivity extends AppCompatActivity {
                 score += 1;
                 scoreView.setText(String.valueOf(score));
             } else {
+                // Correct answer - highlight button with red
                 highlightButton(selectedOptionIndex, Color.RED);
                 Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
                 incorrectQuestions.add(question);
             }
 
+            // Disable after submission, reset selectedOptionIndex
             disableButtons();
             selectedOptionIndex = -1;
         }
 
+        // Stop timer
         if (timer != null) {
             timer.cancel();
         }
 
+
+        // Delay for feedback after displaying new question
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

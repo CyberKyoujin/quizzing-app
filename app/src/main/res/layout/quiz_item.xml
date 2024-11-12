@@ -26,7 +26,7 @@
             android:layout_marginLeft="10dp"/>
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/question_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3 questions"
@@ -34,7 +34,7 @@
     </LinearLayout>
 
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/delete_btn"
         android:layout_width="50dp"
         android:layout_height="40dp"
         android:layout_weight="0"
