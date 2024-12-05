@@ -3,19 +3,28 @@ agp = "8.6.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+mockitoCore = "5.6.0"
+robolectric = "4.10"
+truth = "1.1.5"
 appcompat = "1.7.0"
 material = "1.12.0"
 activity = "1.9.3"
 constraintlayout = "2.1.4"
+core = "1.6.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+espressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
+mockitoAndroid = { group = "org.mockito", name = "mockito-android", version.ref = "mockitoCore" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+core = { group = "androidx.test", name = "core", version.ref = "core" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

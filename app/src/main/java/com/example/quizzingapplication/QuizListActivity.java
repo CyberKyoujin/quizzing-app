@@ -131,7 +131,7 @@ public class QuizListActivity extends AppCompatActivity implements QuizAdapter.O
     }
 
     // Method to load quizzes from internal storage
-    private List<Quiz> loadQuizzes() {
+    protected List<Quiz> loadQuizzes() {
         List<Quiz> quizList = new ArrayList<>();
 
         try {

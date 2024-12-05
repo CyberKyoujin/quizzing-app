@@ -25,14 +25,14 @@ import java.util.List;
 
 public class CreateQuizActivity extends AppCompatActivity {
 
-    private EditText editQuizName;
-    private EditText editTimerDuration;
+    protected EditText editQuizName;
+    protected EditText editTimerDuration;
     private Button buttonAddQuestion;
     private Button buttonSubmitQuiz;
     private Button buttonCancelQuiz;
     private LinearLayout questionsContainer;
 
-    private List<QuestionInputView> questionInputViews = new ArrayList<>();
+    protected List<QuestionInputView> questionInputViews = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +63,13 @@ public class CreateQuizActivity extends AppCompatActivity {
     }
 
     // Method to navigate back to the quiz list
-    private void cancelQuiz(){
+    private void cancelQuiz() {
         Intent intent = new Intent(CreateQuizActivity.this, QuizListActivity.class);
         startActivity(intent);
     }
 
     // Method to create a quiz
-    private void submitQuiz() {
+    void submitQuiz() {
 
         // Get data from the input fields
         String quizName = editQuizName.getText().toString().trim();
@@ -144,10 +144,10 @@ public class CreateQuizActivity extends AppCompatActivity {
     }
 
     // Method to save a quiz to the JSON file from the internal storage
-    private boolean saveQuiz(Quiz newQuiz) {
+    public boolean saveQuiz(Quiz newQuiz) {
+
         try {
 
-            // Getting the quizzes file from the internal storage
             File file = new File(getFilesDir(), "quizzes.json");
 
             // Load existing quizzes
@@ -192,6 +192,8 @@ public class CreateQuizActivity extends AppCompatActivity {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return false;
+
         }
     }
+
 }
