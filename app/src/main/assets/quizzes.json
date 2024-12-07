@@ -1,6 +1,6 @@
 [
   {
-    "name": "City Quiz",
+    "name": "Capitals Quiz",
     "timer_duration": 30,
     "questions": [
       {
@@ -8,19 +8,21 @@
         "type": "single",
         "options": ["Paris", "London", "Amsterdam", "New York"],
         "answers": [1]
-      }
-    ]
-  },
-  {
-    "name": "Geo Quiz",
-    "timer_duration": 20,
-    "questions": [
+      },
+
       {
-        "text": "Which planets are gas giants?",
+        "text": "What is the capital of the USA?",
+        "type": "single",
+        "options": ["Washington", "New York", "Chicago", "Washington"],
+        "answers": [3]
+      },
+      {
+        "text": "What is the capital of France?",
         "type": "multiple choice",
-        "options": ["Earth", "Jupiter", "Mars", "Saturn"],
-        "answers": [1, 3]
+        "options": ["Paris", "Berlin", "Rome", "Budapest"],
+        "answers": [1]
       }
+
     ]
   }
 ]

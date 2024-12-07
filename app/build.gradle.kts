@@ -39,14 +39,16 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.espresso.contrib)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockitoCore)
-    testImplementation(libs.truth)
+    androidTestImplementation(libs.truth)
     testImplementation(libs.robolectric)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.mockitoAndroid)
     androidTestImplementation(libs.core)
+    androidTestImplementation(libs.testRules)
 }

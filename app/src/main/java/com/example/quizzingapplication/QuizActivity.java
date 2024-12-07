@@ -66,7 +66,7 @@ public class QuizActivity extends AppCompatActivity {
         setContentView(R.layout.quiz_activity);
 
         questionView = findViewById(R.id.text_question);
-        scoreView = findViewById(R.id.score_view);
+        scoreView = findViewById(R.id.score_view_res);
         questionTypeView = findViewById(R.id.question_type_view);
         repeatQuestionsView = findViewById(R.id.repeat_questions_view);
         timerView = findViewById(R.id.timer_view);

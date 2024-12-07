@@ -1,52 +1,68 @@
 package com.example.quizzingapplication;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.core.app.ApplicationProvider;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 public class QuizSaverTest {
 
-    private CreateQuizActivity createQuizActivity;
-    private QuizListActivity quizListActivity;
+    private File quizFile;
+    private QuizSaver quizSaver;
 
     @Before
-    public void setUp() {
-        createQuizActivity = mock(CreateQuizActivity.class);
-        quizListActivity = mock(QuizListActivity.class);
+    public void setUp() throws Exception {
+        Context context = ApplicationProvider.getApplicationContext();
+        quizFile = new File(context.getFilesDir(), "test_quizzes.json");
+
+        if (!quizFile.exists()) {
+            quizFile.createNewFile();
+        }
+
+        JSONArray emptyArray = new JSONArray();
+        try (FileOutputStream fos = new FileOutputStream(quizFile)) {
+            fos.write(emptyArray.toString().getBytes(StandardCharsets.UTF_8));
+        }
+
+        quizSaver = new QuizSaver();
     }
 
+
+    // Test save quiz
     @Test
-    public void testSaveQuiz() {
-        Quiz quiz = new Quiz("Sample Quiz", List.of(new Question("Question 1", "single", List.of("Option 1", "Option 2"), List.of(0))), 10);
-        File file = new File("quizzes.json");
+    public void testSaveQuiz() throws Exception {
+        List<String> options = Arrays.asList("Yes", "No");
+        List<Integer> answers = Arrays.asList(0);
+        Question q = new Question("Test question?", "single", options, answers);
+        Quiz quiz = new Quiz("Test Quiz", Arrays.asList(q), 30);
 
-        when(createQuizActivity.saveQuiz(quiz)).thenReturn(true);
+        boolean result = quizSaver.saveQuiz(quiz, quizFile);
+        assertThat(result).isTrue();
 
-        boolean result = createQuizActivity.saveQuiz(quiz);
-        assertTrue(result);
-    }
+        FileInputStream fis = new FileInputStream(quizFile);
+        byte[] buffer = new byte[(int) quizFile.length()];
+        fis.read(buffer);
+        fis.close();
 
-    @Test
-    public void testLoadQuizzes() {
-        List<Quiz> mockedQuizzes = List.of(new Quiz("Mock Quiz", List.of(new Question("Mock Question", "multiple", List.of("Option 1", "Option 2"), List.of(0))), 10));
+        String json = new String(buffer, "UTF-8");
+        JSONArray quizArray = new JSONArray(json);
 
-        when(quizListActivity.loadQuizzes()).thenReturn(mockedQuizzes);
-
-        List<Quiz> quizzes = quizListActivity.loadQuizzes();
-        assertNotNull(quizzes);
-        assertTrue(quizzes.size() > 0);
+        assertThat(quizArray.length()).isEqualTo(1);
+        JSONObject quizObj = quizArray.getJSONObject(0);
+        assertThat(quizObj.getString("name")).isEqualTo("Test Quiz");
+        assertThat(quizObj.getInt("timer_duration")).isEqualTo(30);
     }
 }

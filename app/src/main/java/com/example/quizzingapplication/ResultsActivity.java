@@ -25,7 +25,7 @@ public class ResultsActivity extends AppCompatActivity {
 
         score = getIntent().getIntExtra("score", 0);
 
-        scoreView = findViewById(R.id.score_value_view);
+        scoreView = findViewById(R.id.score_res_value);
 
         menuButton = findViewById(R.id.menu_btn);
         restartButton = findViewById(R.id.restart_quiz_btn);
