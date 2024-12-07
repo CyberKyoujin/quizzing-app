@@ -13,7 +13,7 @@ git clone https://github.com/CyberKyoujin/quizzing-app.git
 
 ## Overview
 - Main Activity (Main Menu)
-- 
+ 
   ![image](https://github.com/user-attachments/assets/abde7ebe-a7cf-4c59-848b-78d275c34d02)
 
 
