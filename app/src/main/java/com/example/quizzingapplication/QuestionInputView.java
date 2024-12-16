@@ -41,7 +41,7 @@ public class QuestionInputView {
     }
 
     private void addOptionView() {
-        if (optionInputViews.size() >= 10) { // Limit to 4 options
+        if (optionInputViews.size() >= 4) { // Limit to 4 options
             Toast.makeText(editQuestionText.getContext(), "Maximum 4 options allowed", Toast.LENGTH_SHORT).show();
             return;
         }
