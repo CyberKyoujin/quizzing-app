@@ -4,25 +4,24 @@
     "timer_duration": 30,
     "questions": [
       {
-        "text": "What is the capital of Great Britain?",
+        "text": "What is the capital of the Great Britain?",
         "type": "single",
         "options": ["Paris", "London", "Amsterdam", "New York"],
         "answers": [1]
       },
-
       {
         "text": "What is the capital of the USA?",
         "type": "single",
-        "options": ["Washington", "New York", "Chicago", "Washington"],
-        "answers": [3]
+        "options": ["Washington", "New York", "Chicago", "Texas"],
+        "answers": [0]
       },
       {
-        "text": "What is the capital of France?",
+        "text": "Which of the following are capitals of European countries?",
         "type": "multiple choice",
-        "options": ["Paris", "Berlin", "Rome", "Budapest"],
-        "answers": [1]
+        "options": ["Paris", "Berlin", "Tokyo", "New York"],
+        "answers": [0, 1]
       }
-
     ]
   }
 ]
+
