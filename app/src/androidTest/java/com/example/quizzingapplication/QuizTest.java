@@ -16,7 +16,7 @@ public class QuizTest {
     // Test Quiz creation
 
     @Test
-    public void quizParcelable_roundTrip_succeeds() {
+    public void testQuizParcelable() {
         List<String> options = Arrays.asList("Option1", "Option2");
         List<Integer> answers = Arrays.asList(1);
         Question question = new Question("Is this a test?", "single", options, answers);
